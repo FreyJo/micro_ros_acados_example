@@ -66,45 +66,31 @@ int main()
 
     // initial condition
     double x_current[NX];
-    x_current[0] = 0.0;
-    x_current[1] = 0.0;
-    x_current[2] = 0.0;
-    x_current[3] = 0.0;
-
-  
     x_current[0] = 0;
     x_current[1] = 3.141592653589793;
     x_current[2] = 0;
     x_current[3] = 0;
-    
-  
-
 
     // initial value for control input
     double u0[NU];
     u0[0] = 0.0;
 
-    int n_sim_steps = 3;
-    // solve ocp in loop
-    for (int ii = 0; ii < n_sim_steps; ii++)
+    sim_in_set(acados_sim_config, acados_sim_dims,
+        acados_sim_in, "x", x_current);
+    status = pendulum_ode_acados_sim_solve(capsule);
+
+    if (status != ACADOS_SUCCESS)
     {
-        sim_in_set(acados_sim_config, acados_sim_dims,
-            acados_sim_in, "x", x_current);
-        status = pendulum_ode_acados_sim_solve(capsule);
+        printf("acados_solve() failed with status %d.\n", status);
+    }
 
-        if (status != ACADOS_SUCCESS)
-        {
-            printf("acados_solve() failed with status %d.\n", status);
-        }
+    sim_out_get(acados_sim_config, acados_sim_dims,
+            acados_sim_out, "x", x_current);
 
-        sim_out_get(acados_sim_config, acados_sim_dims,
-               acados_sim_out, "x", x_current);
-        
-        printf("\nx_current, %d\n", ii);
-        for (int jj = 0; jj < NX; jj++)
-        {
-            printf("%e\n", x_current[jj]);
-        }
+    printf("\nx_current, %d\n", ii);
+    for (int jj = 0; jj < NX; jj++)
+    {
+        printf("%e\n", x_current[jj]);
     }
 
     printf("\nPerformed %d simulation steps with acados integrator successfully.\n\n", n_sim_steps);
